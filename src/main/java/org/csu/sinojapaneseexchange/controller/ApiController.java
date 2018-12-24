@@ -27,15 +27,28 @@ public class ApiController {
     // 应该改为流
     @GetMapping("/api/voice/japanese")
     @ApiOperation("日文发音")
-    public void voice(@RequestParam("text") String text){
-        ttsUtil.tts(text, JAPANESE);
+    public Result japaneseVoice(@RequestParam("text") String text){
+
+        try{
+            return ResultGenerator.success(ttsUtil.tts(text, JAPANESE));
+        } catch (Exception e)
+        {
+            return ResultGenerator.fail(e.getMessage());
+        }
+
     }
 
 
     @GetMapping("/api/voice/chinese")
     @ApiOperation("中文发音")
-    public void voice2(@RequestParam("text") String text){
-        ttsUtil.tts(text, CHINESE);
+    public Result chineseVoice(@RequestParam("text") String text){
+
+        try{
+            return ResultGenerator.success(ttsUtil.tts(text, CHINESE));
+        } catch (Exception e)
+        {
+            return ResultGenerator.fail(e.getMessage());
+        }
     }
 
 

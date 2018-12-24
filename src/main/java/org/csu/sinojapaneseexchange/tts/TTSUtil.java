@@ -46,10 +46,15 @@ public class TTSUtil {
     String genderName = Gender.Female;
 //    String voiceName = "Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)";
 
-	public void tts(String textToSynthesize, String voiceName) {
+	public byte[] tts(String textToSynthesize, String voiceName) {
 
         try{
         	byte[] audioBuffer = TTSService.Synthesize(auth, textToSynthesize, outputFormat, deviceLanguage, genderName, voiceName);
+
+            for (byte o :
+                    audioBuffer) {
+                System.out.print(o);
+            }
 
         	// write the pcm data to the file
         	String outputWave = ".\\output.pcm";
@@ -91,8 +96,11 @@ public class TTSUtil {
                sourceDataLine.close();
                audioInputStream.close();
 
+               return audioBuffer;
+
         }catch(Exception e){
-        	e.printStackTrace();
+            e.printStackTrace();
+            return null;
         }
    }
 
