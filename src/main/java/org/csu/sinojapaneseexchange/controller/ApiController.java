@@ -5,12 +5,20 @@ import io.swagger.annotations.ApiOperation;
 import org.csu.sinojapaneseexchange.domain.WordInfo;
 import org.csu.sinojapaneseexchange.interaction.Result;
 import org.csu.sinojapaneseexchange.interaction.ResultGenerator;
+import org.csu.sinojapaneseexchange.ocr.OCR;
 import org.csu.sinojapaneseexchange.service.WordInfoService;
 import org.csu.sinojapaneseexchange.translate.Translator;
 import org.csu.sinojapaneseexchange.tts.TTSUtil;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -24,16 +32,31 @@ public class ApiController {
     @Autowired
     WordInfoService wordInfoService;
 
-    // 应该改为流
+
     @GetMapping("/api/voice/japanese")
     @ApiOperation("日文发音")
-    public Result japaneseVoice(@RequestParam("text") String text){
+    public @ResponseBody void japaneseVoice(@RequestParam("text") String text, HttpServletResponse httpServletResponse){
 
         try{
-            return ResultGenerator.success(ttsUtil.tts(text, JAPANESE));
+            ByteArrayInputStream in = new ByteArrayInputStream(ttsUtil.tts(text, JAPANESE));
+            ServletOutputStream out = httpServletResponse.getOutputStream();
+            byte[] b = null;
+            while(in.available() >0) {
+                if(in.available()>10240) {
+                    b = new byte[10240];
+                }else {
+                    b = new byte[in.available()];
+                }
+                in.read(b, 0, b.length);
+                out.write(b, 0, b.length);
+            }
+            in.close();
+            out.flush();
+            out.close();
+
         } catch (Exception e)
         {
-            return ResultGenerator.fail(e.getMessage());
+            e.printStackTrace();
         }
 
     }
@@ -41,25 +64,27 @@ public class ApiController {
 
     @GetMapping("/api/voice/chinese")
     @ApiOperation("中文发音")
-    public Result chineseVoice(@RequestParam("text") String text){
-
+    public @ResponseBody void chineseVoice(@RequestParam("text") String text, HttpServletResponse httpServletResponse){
         try{
-            return ResultGenerator.success(ttsUtil.tts(text, CHINESE));
+            ByteArrayInputStream in = new ByteArrayInputStream(ttsUtil.tts(text, CHINESE));
+            ServletOutputStream out = httpServletResponse.getOutputStream();
+            byte[] b = null;
+            while(in.available() >0) {
+                if(in.available()>10240) {
+                    b = new byte[10240];
+                }else {
+                    b = new byte[in.available()];
+                }
+                in.read(b, 0, b.length);
+                out.write(b, 0, b.length);
+            }
+            in.close();
+            out.flush();
+            out.close();
+
         } catch (Exception e)
         {
-            return ResultGenerator.fail(e.getMessage());
-        }
-    }
-
-
-    @GetMapping("/api/words")
-    @ApiOperation("根据id返回单词")
-    public Result getNext(@RequestParam("id") int id){
-        try{
-            return ResultGenerator.success(wordInfoService.getWordInfoById(id));
-        } catch (Exception e)
-        {
-            return ResultGenerator.fail(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -104,6 +129,22 @@ public class ApiController {
         } catch (Exception e)
         {
             return ResultGenerator.fail(e.getMessage());
+        }
+    }
+
+
+    @GetMapping("/ocr")
+    @ApiOperation("图像识别")
+    public Result ocr(@RequestParam("imgPath") String imgPath)
+    {
+        List<String> res = null;
+        try {
+            res =  OCR.getOCRResult(imgPath);
+
+            return  ResultGenerator.success(res);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return ResultGenerator.fail(null);
         }
     }
 

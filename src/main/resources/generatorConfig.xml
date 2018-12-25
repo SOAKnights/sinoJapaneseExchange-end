@@ -53,7 +53,7 @@
         <javaClientGenerator targetPackage="org.csu.sinojapaneseexchange.persistence" targetProject="src/main/java" type="ANNOTATEDMAPPER">
         </javaClientGenerator>
 
-        <!--<table tableName="tb_data" domainObjectName="WordInfo"></table>-->
+        <table tableName="tb_data" domainObjectName="WordInfo"></table>
 
     </context>
 </generatorConfiguration>

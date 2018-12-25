@@ -46,55 +46,58 @@ public class TTSUtil {
     String genderName = Gender.Female;
 //    String voiceName = "Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)";
 
+
+
+
 	public byte[] tts(String textToSynthesize, String voiceName) {
 
         try{
         	byte[] audioBuffer = TTSService.Synthesize(auth, textToSynthesize, outputFormat, deviceLanguage, genderName, voiceName);
 
-            for (byte o :
-                    audioBuffer) {
-                System.out.print(o);
-            }
-
-        	// write the pcm data to the file
-        	String outputWave = ".\\output.pcm";
-        	File outputAudio = new File(outputWave);
-        	FileOutputStream fstream = new FileOutputStream(outputAudio);
-            fstream.write(audioBuffer);
-            fstream.flush();
-            fstream.close();
-
-            // specify the audio format
-           	AudioFormat audioFormat = new AudioFormat(
-           			AudioFormat.Encoding.PCM_SIGNED,
-               		24000,
-               		16,
-               		1,
-               		1 * 2,
-               		24000,
-               		false);
-
-               AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(outputWave));
-
-               DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class,
-                       audioFormat, AudioSystem.NOT_SPECIFIED);
-               SourceDataLine sourceDataLine = (SourceDataLine) AudioSystem
-                       .getLine(dataLineInfo);
-               sourceDataLine.open(audioFormat);
-               sourceDataLine.start();
-               System.out.println("start to play the wave:");
-               /*
-                * read the audio data and send to mixer
-                */
-               int count;
-               byte tempBuffer[] = new byte[4096];
-               while ((count = audioInputStream.read(tempBuffer, 0, tempBuffer.length)) >0) {
-                       sourceDataLine.write(tempBuffer, 0, count);
-               }
-
-               sourceDataLine.drain();
-               sourceDataLine.close();
-               audioInputStream.close();
+//            for (byte o :
+//                    audioBuffer) {
+//                System.out.print(o);
+//            }
+//
+//        	// write the pcm data to the file
+//        	String outputWave = ".\\output.pcm";
+//        	File outputAudio = new File(outputWave);
+//        	FileOutputStream fstream = new FileOutputStream(outputAudio);
+//            fstream.write(audioBuffer);
+//            fstream.flush();
+//            fstream.close();
+//
+//            // specify the audio format
+//           	AudioFormat audioFormat = new AudioFormat(
+//           			AudioFormat.Encoding.PCM_SIGNED,
+//               		24000,
+//               		16,
+//               		1,
+//               		1 * 2,
+//               		24000,
+//               		false);
+//
+//               AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(outputWave));
+//
+//               DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class,
+//                       audioFormat, AudioSystem.NOT_SPECIFIED);
+//               SourceDataLine sourceDataLine = (SourceDataLine) AudioSystem
+//                       .getLine(dataLineInfo);
+//               sourceDataLine.open(audioFormat);
+//               sourceDataLine.start();
+//               System.out.println("start to play the wave:");
+//               /*
+//                * read the audio data and send to mixer
+//                */
+//               int count;
+//               byte tempBuffer[] = new byte[4096];
+//               while ((count = audioInputStream.read(tempBuffer, 0, tempBuffer.length)) >0) {
+//                       sourceDataLine.write(tempBuffer, 0, count);
+//               }
+//
+//               sourceDataLine.drain();
+//               sourceDataLine.close();
+//               audioInputStream.close();
 
                return audioBuffer;
 
