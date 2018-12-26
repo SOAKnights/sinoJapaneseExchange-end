@@ -97,11 +97,7 @@ public class Translator {
 		String tk = "";
 		ScriptEngine engine = new ScriptEngineManager().getEngineByName("js");
 		try {
-			// FileReader reader = new FileReader(ConfigUtil.getString("GoogleJs"));
-			URL resource = Translator.class.getResource("");
-			String string = resource.getPath().split("/WEB-INF")[0];
-			string = string + "google.js";
-			FileReader reader = new FileReader(string);
+			FileReader reader = new FileReader("src/main/java/org/csu/sinojapaneseexchange/translate/google.js");
 			engine.eval(reader);
 			if (engine instanceof Invocable) {
 				Invocable invoke = (Invocable) engine;

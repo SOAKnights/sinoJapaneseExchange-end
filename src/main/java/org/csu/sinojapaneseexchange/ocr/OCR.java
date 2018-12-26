@@ -1,5 +1,6 @@
 package org.csu.sinojapaneseexchange.ocr;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,26 +18,28 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.web.multipart.MultipartFile;
 
 
 public class OCR {
 
-	public static List getOCRResult(String imgPath) throws JSONException {
+
+	public static List getOCRResult(MultipartFile imgFile) throws JSONException {
 		Map<String, String> map = new HashMap<String, String>();
-	    map.put("appKey", ConstantUtils.APPKEY);
+		map.put("appKey", ConstantUtils.APPKEY);
 
-	    String img = ImageUtils.getImageStr(imgPath);
+		String img = ImageUtils.getImageStr(imgFile);
 
-	    map.put("img", img);
-	    map.put("detectType", ConstantUtils.ROW_OCR);
-	    map.put("imageType", ConstantUtils.BASE64);
-	    map.put("langType", ConstantUtils.JAPANESE_KOREA);
-	    map.put("docType", ConstantUtils.DOCTYPE);
-	    String salt = String.valueOf(System.currentTimeMillis());
-	    map.put("salt", salt);
-	    String sign = MD5Utils.md5(ConstantUtils.APPKEY + img + salt + ConstantUtils.KEY);
-	    map.put("sign", sign);
-	    String result = null;
+		map.put("img", img);
+		map.put("detectType", ConstantUtils.ROW_OCR);
+		map.put("imageType", ConstantUtils.BASE64);
+		map.put("langType", ConstantUtils.JAPANESE_KOREA);
+		map.put("docType", ConstantUtils.DOCTYPE);
+		String salt = String.valueOf(System.currentTimeMillis());
+		map.put("salt", salt);
+		String sign = MD5Utils.md5(ConstantUtils.APPKEY + img + salt + ConstantUtils.KEY);
+		map.put("sign", sign);
+		String result = null;
 		try {
 			result = requestOCRForHttp(ConstantUtils.YOUDAO_URL,map);
 		} catch (Exception e) {
@@ -44,9 +47,36 @@ public class OCR {
 			e.printStackTrace();
 		}
 		List list = getOCRFormat(result);
-	    System.out.println(list);
-	    return list;
+		System.out.println(list);
+		return list;
 	}
+
+//	public static List getOCRResult(String imgPath) throws JSONException {
+//		Map<String, String> map = new HashMap<String, String>();
+//	    map.put("appKey", ConstantUtils.APPKEY);
+//
+//	    String img = ImageUtils.getImageStr(imgPath);
+//
+//	    map.put("img", img);
+//	    map.put("detectType", ConstantUtils.ROW_OCR);
+//	    map.put("imageType", ConstantUtils.BASE64);
+//	    map.put("langType", ConstantUtils.JAPANESE_KOREA);
+//	    map.put("docType", ConstantUtils.DOCTYPE);
+//	    String salt = String.valueOf(System.currentTimeMillis());
+//	    map.put("salt", salt);
+//	    String sign = MD5Utils.md5(ConstantUtils.APPKEY + img + salt + ConstantUtils.KEY);
+//	    map.put("sign", sign);
+//	    String result = null;
+//		try {
+//			result = requestOCRForHttp(ConstantUtils.YOUDAO_URL,map);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		List list = getOCRFormat(result);
+//	    System.out.println(list);
+//	    return list;
+//	}
 	
 	public static String requestOCRForHttp(String url,Map<String,String> requestParams) throws Exception{
 	      String result = null;

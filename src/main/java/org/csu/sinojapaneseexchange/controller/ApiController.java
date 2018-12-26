@@ -7,17 +7,19 @@ import org.csu.sinojapaneseexchange.interaction.Result;
 import org.csu.sinojapaneseexchange.interaction.ResultGenerator;
 import org.csu.sinojapaneseexchange.ocr.OCR;
 import org.csu.sinojapaneseexchange.service.WordInfoService;
+import org.csu.sinojapaneseexchange.stt.SpeechClientREST;
 import org.csu.sinojapaneseexchange.translate.Translator;
+import org.csu.sinojapaneseexchange.tts.Authentication;
 import org.csu.sinojapaneseexchange.tts.TTSUtil;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +27,10 @@ import java.util.Map;
 @CrossOrigin
 public class ApiController {
 
-    TTSUtil ttsUtil = new TTSUtil();
+    Authentication auth = new Authentication("946b0d0df66048139b98cf59fb42564b");
+    SpeechClientREST speechClientREST = new SpeechClientREST(auth);
+
+
     private final String CHINESE = "Microsoft Server Speech Text to Speech Voice (zh-CN, Yaoyao, Apollo)";
     private final String JAPANESE = "Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)";
 
@@ -38,7 +43,9 @@ public class ApiController {
     public @ResponseBody void japaneseVoice(@RequestParam("text") String text, HttpServletResponse httpServletResponse){
 
         try{
-            ByteArrayInputStream in = new ByteArrayInputStream(ttsUtil.tts(text, JAPANESE));
+            byte[] audioBytes = TTSUtil.tts(text, JAPANESE, auth);
+
+            ByteArrayInputStream in = new ByteArrayInputStream(audioBytes);
             ServletOutputStream out = httpServletResponse.getOutputStream();
             byte[] b = null;
             while(in.available() >0) {
@@ -61,12 +68,40 @@ public class ApiController {
 
     }
 
+//    @GetMapping("/api/voice/japanese")
+//    @ApiOperation("日文发音")
+//    public Result japaneseVoice(@RequestParam("text") String text){
+//
+//        try{
+//            byte[] audioBytes = ttsUtil.tts(text, JAPANESE);
+//
+//            InputStream inputStream = new ByteArrayInputStream(audioBytes);
+//            OutputStream outputStream = new FileOutputStream("a.mp3");
+//            byte[] buff = new byte[1024];
+//            int len;
+//            while ((len = inputStream.read(buff)) != -1)
+//            {
+//                outputStream.write(buff,0,len);
+//            }
+//            inputStream.close();
+//            outputStream.flush();
+//            outputStream.close();
+//
+//            File file = new File("a.mp3");
+//            return ResultGenerator.success(file);
+//
+//        } catch (Exception e)
+//        {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
     @GetMapping("/api/voice/chinese")
     @ApiOperation("中文发音")
     public @ResponseBody void chineseVoice(@RequestParam("text") String text, HttpServletResponse httpServletResponse){
         try{
-            ByteArrayInputStream in = new ByteArrayInputStream(ttsUtil.tts(text, CHINESE));
+            ByteArrayInputStream in = new ByteArrayInputStream(TTSUtil.tts(text, CHINESE,auth));
             ServletOutputStream out = httpServletResponse.getOutputStream();
             byte[] b = null;
             while(in.available() >0) {
@@ -133,13 +168,13 @@ public class ApiController {
     }
 
 
-    @GetMapping("/ocr")
+    @PostMapping("/ocr")
     @ApiOperation("图像识别")
-    public Result ocr(@RequestParam("imgPath") String imgPath)
+    public Result ocr(MultipartFile imgFile)
     {
         List<String> res = null;
         try {
-            res =  OCR.getOCRResult(imgPath);
+            res =  OCR.getOCRResult(imgFile);
 
             return  ResultGenerator.success(res);
         } catch (JSONException e) {
@@ -147,5 +182,47 @@ public class ApiController {
             return ResultGenerator.fail(null);
         }
     }
+
+
+    @PostMapping("/stt")
+    @ApiOperation("语音转文字")
+    public Result stt(MultipartFile voiceFile)
+    {
+        try {
+            InputStream input = voiceFile.getInputStream();
+            String result = speechClientREST.process(input);
+
+            if ("Success".equals(result.substring(22,29)))
+                return ResultGenerator.success(result.substring(result.indexOf("DisplayText") + 14, result.indexOf("\",\"Offset")));
+            else
+                return ResultGenerator.fail("识别失败");
+
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            return ResultGenerator.fail("识别失败");
+        }
+    }
+
+//    @PostMapping("/stt")
+//    @ApiOperation("语音转文字")
+//    public Result stt(@RequestParam("path") String path)
+//    {
+//        try {
+//            InputStream input = new FileInputStream(Paths.get(path).toFile());
+//            String result = speechClientREST.process(input);
+//
+//            if ("Success".equals(result.substring(22,29)))
+//                return ResultGenerator.success(result.substring(result.indexOf("DisplayText") + 14, result.indexOf("\",\"Offset")));
+//            else
+//                return ResultGenerator.fail("识别失败");
+//
+//        }catch (Exception e)
+//        {
+//            e.printStackTrace();
+//            return ResultGenerator.fail("识别失败");
+//        }
+//    }
+
 
 }

@@ -41,19 +41,17 @@ public class TTSUtil {
 
     // 密钥
     private Authentication auth = new Authentication("946b0d0df66048139b98cf59fb42564b");
-    String outputFormat = AudioOutputFormat.Riff24Khz16BitMonoPcm;
-    String deviceLanguage = "en-US";
-    String genderName = Gender.Female;
+    static String outputFormat = AudioOutputFormat.Riff24Khz16BitMonoPcm;
+    static String deviceLanguage = "en-US";
+    static String genderName = Gender.Female;
 //    String voiceName = "Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)";
 
 
-
-
-	public byte[] tts(String textToSynthesize, String voiceName) {
+	public static byte[] tts(String textToSynthesize, String voiceName, Authentication auth) {
 
         try{
-        	byte[] audioBuffer = TTSService.Synthesize(auth, textToSynthesize, outputFormat, deviceLanguage, genderName, voiceName);
 
+        	byte[] audioBuffer = TTSService.Synthesize(auth, textToSynthesize, outputFormat, deviceLanguage, genderName, voiceName);
 //            for (byte o :
 //                    audioBuffer) {
 //                System.out.print(o);
@@ -98,8 +96,7 @@ public class TTSUtil {
 //               sourceDataLine.drain();
 //               sourceDataLine.close();
 //               audioInputStream.close();
-
-               return audioBuffer;
+            return audioBuffer;
 
         }catch(Exception e){
             e.printStackTrace();
